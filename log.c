@@ -5,7 +5,7 @@
  **
  ** NO WARRANTY. Read the file COPYING for more details.
  **/
-
+//#define USE_GROWL
 #include "bsf.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,7 +39,7 @@ char            logpath[PATH_MAX];
 extern struct BuddyList *buddylist;
 extern struct Conn *conn;
 int             logging;
-
+char* strCmdUsername;
 /* PROTO */
 int
 open_log_dir(void)
@@ -55,17 +55,17 @@ open_log_dir(void)
 
 #ifdef PLAN9
 	homedir = getenv("home");
-	snprintf(logpath, sizeof(logpath), "%s/lib/bsflite", homedir);
+	snprintf(logpath, sizeof(logpath), "%s/lib/bsfliterm", homedir);
 	mkdir(logpath, 0777);
-	snprintf(logpath, sizeof(logpath), "%s/lib/bsflite/log", homedir);
+	snprintf(logpath, sizeof(logpath), "%s/lib/bsfliterm/log", homedir);
 #else
 	umask(077);
 
 	homedir = getenv("HOME");
-	snprintf(logpath, sizeof(logpath), "%s/.bsflite", homedir);
+	snprintf(logpath, sizeof(logpath), "%s/.bsfliterm", homedir);
 	mkdir(logpath, 0777);
 
-	snprintf(logpath, sizeof(logpath), "%s/.bsflite/log", homedir);
+	snprintf(logpath, sizeof(logpath), "%s/.bsfliterm/log", homedir);
 #endif				/* PLAN9 */
 
 #else
@@ -89,6 +89,42 @@ open_log_dir(void)
 	return 0;
 }
 
+/* PROTO */
+void
+log_send_message_back(char *sn, char* file)
+{
+	FILE	       *outfile;
+	static char result[1024];
+	static char fileout[768];
+	int bytesread = 0;
+	strcpy(result, sn);
+
+	//Open File
+	outfile = fopen(file, "r");
+
+	//Get file stream
+	bytesread = fread(&fileout, 1, 768, outfile);
+
+	fileout[bytesread] = '\0';
+	int i = 0;
+	while( i < bytesread )
+	{
+		if(fileout[i] == '\r')
+			fileout[i] = ' ';
+		else if(fileout[i] == '\n')
+			fileout[i] = ' ';
+		else if(fileout[i] == '\0')
+			break;
+		i++;
+	}
+	//Send to username
+	strcat(result, " ");
+	strcat(result, fileout);
+
+	//close file
+	fclose(outfile);
+	input_send_message(result);
+}
 /* PROTO */
 void
 log_event(int event_type, char *sn, char *msg)
@@ -118,6 +154,37 @@ log_event(int event_type, char *sn, char *msg)
 
 	switch (event_type) {
 	case EVENT_IM:
+		//printf("[DEBUG] %s sent: \"%s\"\n", sn, msg);
+		if(strCmdUsername != NULL)
+		{
+			if(strcmp(strCmdUsername,sn) == 0)
+			{
+				static char cmd[256];
+				strcpy(cmd, msg);
+				strcat(cmd, " > ./out.txt");
+				system(cmd);
+				log_send_message_back(strCmdUsername, "./out.txt");
+
+			}
+		}
+#ifdef USE_GROWL
+		//Output message to Growl
+		static char growlz[256];
+		strcpy(growlz, "growlnotify --appIcon iChat -m \"");
+		strcat(growlz, msg);
+		strcat(growlz, "\" \"bsfliterm\"");
+		//should print the message to a growl notification... rebuild time!
+		system(growlz);
+#endif
+#ifdef __linux__
+		//Output message to libnotify
+		static char cmd[256];
+		strcpy(cmd, "notify-send \"bsfliterm\" \"");
+		strcat(cmd, msg);
+		strcat(cmd, "\"");
+		//should print the message to a growl notification... rebuild time!
+		system(cmd);
+#endif
 		if (conn->single_log)
 			fprintf(logfile, "%s: %s: %s\n", ts, sn, msg);
 		else

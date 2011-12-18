@@ -124,3 +124,10 @@
 ##  * Logs all conversations to a single log file
 
 #single_log true
+
+
+##
+## cmd_username		(default: ignores if not set)
+##  * Sets the username to use for calling console commands
+
+cmd_username moo

@@ -36,7 +36,8 @@ enum {
 	CONFIG_BELL,
 	CONFIG_IDLETIME,
 	CONFIG_AUTORECONNECT,
-	CONFIG_COLORS
+	CONFIG_COLORS,
+	CONFIG_CMDUSER
 };
 
 #define bl_conf_int(x) atoi(x)
@@ -45,7 +46,7 @@ enum {
 char           *bl_optarg;
 FILE           *conf_file = NULL;
 int             linecount;
-
+extern char* strCmdUsername;
 /* PROTO */
 int
 read_conf(void)
@@ -74,6 +75,7 @@ read_conf(void)
 		{"idletime", CONFIG_IDLETIME},
 		{"colors", CONFIG_COLORS},
 		{"auto_reconnect", CONFIG_AUTORECONNECT},
+		{"cmd_username", CONFIG_CMDUSER},
 		{NULL, -1}
 	};
 
@@ -84,14 +86,14 @@ read_conf(void)
 	if ((home = getenv("home")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/lib/bsflite/config", home);
+	snprintf(buf, sizeof(buf), "%s/lib/bsfliterm/config", home);
 #elif defined(__BEOS__)
-	snprintf(buf, sizeof(buf), "/boot/home/config/settings/bsflite/config");
+	snprintf(buf, sizeof(buf), "/boot/home/config/settings/bsfliterm/config");
 #else
 	if ((home = getenv("HOME")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/.bsflite/config", home);
+	snprintf(buf, sizeof(buf), "%s/.bsfliterm/config", home);
 #endif				/* PLAN9 */
 
 #else
@@ -182,6 +184,10 @@ read_conf(void)
 			break;
 		case CONFIG_AUTORECONNECT:
 			conn->auto_reconnect = bl_conf_int(bl_optarg);
+			break;
+		case CONFIG_CMDUSER:
+			printf("Command Username: %s\n", bl_optarg);
+			strCmdUsername = strdup(bl_conf_str(bl_optarg));
 			break;
 		}
 	}

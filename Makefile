@@ -1,4 +1,4 @@
-EXEC=bsflite
+EXEC=bsfliterm
 #EXEC=bsflite.exe
 #CC=i586-pc-msdosdjgpp-gcc
 #CC=mingw32-gcc
@@ -43,7 +43,7 @@ realclean:
 	$(MAKE) clean
 
 install:
-	$(INSTALL) -s -m 755 bsflite $(INSTALL_PREFIX)/bin
+	$(INSTALL) -s -m 755 bsfliterm $(INSTALL_PREFIX)/bin
 	$(INSTALL) -m 644 bsflite.1 $(INSTALL_PREFIX)/man/man1
 
 aim.o:		bsf.h colors.h imcomm/imcomm.h

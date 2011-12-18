@@ -45,7 +45,7 @@ int             prompt_len;
 int             ratestatus = 0;
 time_t          last_status_time = 0;
 time_t          last_keystroke_time;
-
+extern char* strCmdUsername;
 /* PROTO */
 void
 addtoinputbuf(char inchr)
@@ -87,6 +87,7 @@ main(void)
 	conn->windowtitle = NULL;
 	conn->username = NULL;
 	conn->password = NULL;
+	strCmdUsername = NULL;
 #ifdef __MINGW32__
 	conn->set_window_title = 1;
 #else
@@ -137,7 +138,7 @@ main(void)
 	buddylist = 0;
 
 	b_echostr_s();
-	printf("bsflite %s started.\n", BSFLITE_VERSION);
+	printf("bsfliterm %s started.\n", BSFLITE_VERSION);
 	memset(inputbuf, 0, sizeof(inputbuf));
 
 	if (needuser) {
@@ -492,7 +493,7 @@ setup_tty(void)
 		perror("can't change tty modes.");
 
 	if (conn->set_window_title) {
-		set_title("bsflite");
+		set_title("bsfliterm");
 	}
 #else
 #ifdef PLAN9
@@ -500,7 +501,7 @@ setup_tty(void)
 
 	label = open("/dev/label", O_WRONLY);
 	if (label >= 0) {
-		write(label, "bsflite", 7);
+		write(label, "bsfliterm", 7);
 	}
 	consctl = open("/dev/consctl", O_WRONLY);
 	if (consctl < 0) {
@@ -621,12 +622,12 @@ set_profile(void *handle)
 	if ((home = getenv("home")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/lib/bsflite/profile", home);
+	snprintf(buf, sizeof(buf), "%s/lib/bsfliterm/profile", home);
 #else
 	if ((home = getenv("HOME")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/.bsflite/profile", home);
+	snprintf(buf, sizeof(buf), "%s/.bsfliterm/profile", home);
 #endif				/* PLAN9 */
 
 #else
@@ -703,12 +704,12 @@ set_icon(void *handle)
 	if ((home = getenv("home")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/lib/bsflite/icon", home);
+	snprintf(buf, sizeof(buf), "%s/lib/bsfliterm/icon", home);
 #else
 	if ((home = getenv("HOME")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/.bsflite/icon", home);
+	snprintf(buf, sizeof(buf), "%s/.bsfliterm/icon", home);
 #endif				/* PLAN9 */
 
 #else
@@ -758,12 +759,12 @@ load_buddylist(void *handle)
 	if ((home = getenv("home")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/lib/bsflite/buddies", home);
+	snprintf(buf, sizeof(buf), "%s/lib/bsfliterm/buddies", home);
 #else
 	if ((home = getenv("HOME")) == NULL)
 		home = ".";
 
-	snprintf(buf, sizeof(buf), "%s/.bsflite/buddies", home);
+	snprintf(buf, sizeof(buf), "%s/.bsfliterm/buddies", home);
 #endif				/* PLAN9 */
 
 #else
